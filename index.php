@@ -2,6 +2,8 @@
 header('Content-Type: text/html; charset=utf-8');
 // подключаемся к API
 require_once("vendor/autoload.php");
+require_once("db_connect.php");
+require_once("bond.php");
 // создаем переменную бота
 $token = "1206590134:AAGNW2hP9bUM0LztTSMmBmlMPq5jbT0FnkY";
 $bot = new \TelegramBot\Api\Client($token);
@@ -83,19 +85,9 @@ $bot->command('start', function ($message) use ($bot) {
     $answer = 'Команды:
     /help - помощь
     /buttons - показать всякие кнопочки
-
-    Личное:
-    /HowIsBondar
-    /HowIsLev
-    /HowIsMary
-    /HowIsPipir
-    /HowIsMel
-    /HowIsAnn
-    /HowIsKapusta
-
-    Прочее:
-    /LastTrack - последний трек Льва
     /SashaILoveYou - вы сами знаете.)
+
+    Чтобы записать фразу для Бонда в хранилище фраз, просто напишите свою фразу после bond reply:
     ';
     $bot->sendMessage($message->getChat()->getId(), $answer);
     });
@@ -179,6 +171,21 @@ $bot->command('start', function ($message) use ($bot) {
         $answer = 'Спасибо, что спросили! Тут, в облачном хранилище телеграма как-то жутковато, но я не унываю!)';
         $bot->sendMessage($message->getChat()->getId(), $answer);
         });
+    
+    $bot->command('SetIfBond', function ($message) use ($bot) {
+        $answer = 'Напишите фразу';
+        $bot->sendMessage($message->getChat()->getId(), $answer);
+        //$index = "go";
+       // $mtext = $message->getText();
+        // $data = array( "message" => $mtext );
+        // set_udata($message->getFrom()->getUsername(), $data);
+        
+        // // тест получения данных
+        // $data = get_udata($message->getFrom()->getUsername());
+        // $bot->sendMessage($message->getChat()->getId(), json_encode($data,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE)); 
+
+        //make_user($message->getFrom()->getUsername(),$cid);
+        });
 
     $bot->command('rss', function ($message) use ($bot) {
         $answer = 'вот что мне удалось найти';
@@ -216,18 +223,31 @@ $bot->command('start', function ($message) use ($bot) {
         $message = $Update->getMessage();
         $mtext = $message->getText();
         $cid = $message->getChat()->getId();
+        
         if(mb_stripos($mtext,"привет") !== false){
             $bot->sendMessage($message->getChat()->getId(), "Привет, чувак!");
         }
-        else if(mb_stripos($mtext,"Бонд") !== false){
-            $bot->sendMessage($message->getChat()->getId(), "Саша Андрюшин, кстати, просил передать, что Бонд - шлюха");
-        }
-        else if(mb_stripos($mtext,"дела") !== false){
+        else if(mb_stripos($mtext,"Бот, как дела") !== false){
             $bot->sendMessage($message->getChat()->getId(), "О, спросите у меня тоже как дела!
             Это можно сделать с помощью команды /HowIsBot");
         }
         else if(mb_stripos($mtext,"Вино") !== false){
             $bot->sendMessage($message->getChat()->getId(), "Ира, похоже, пора снова заказывать 5л.)");
+        }
+        else if(mb_stripos($mtext,"алиса") !== false){
+            $bot->sendMessage($message->getChat()->getId(), "Алиса, покажи писюльку коляна");
+        }
+        else if(mb_stripos($mtext,"Кепыч") !== false){
+            $bot->sendMessage($message->getChat()->getId(), "Кепыч навсегда в наших сердцах");
+        }
+        else if(mb_stripos($mtext,"павелецк") !== false){
+            $bot->sendMessage($message->getChat()->getId(), "кто живет в центре тот лох");
+        }
+        else if(mb_stripos($mtext,"восточн") !== false){
+            $bot->sendMessage($message->getChat()->getId(), "кто живет за мкадом тот лох");
+        }
+        else if(mb_stripos($mtext,"айфон") !== false){
+            $bot->sendMessage($message->getChat()->getId(), "знаете, почему католики ненавидят айфоны? из-за яблока");
         }
         else if(mb_stripos($mtext,"винишко") !== false){
             $bot->sendMessage($message->getChat()->getId(), "Так, пора делать команду для меня для автоматического дозаказа вина.)");
@@ -236,6 +256,26 @@ $bot->command('start', function ($message) use ($bot) {
             $pic = "https://rtvi.com/upload/iblock/a83/a838c6726e325726b6703fb90b3127b1.jpg";
             $bot->sendPhoto($message->getChat()->getId(), $pic);
         }
+        else if(mb_stripos($mtext,"Bond reply:") !== false){
+            $mtext = $message->getText();
+            $data = array( "message" => $mtext );
+            $res = set_bond($message->getFrom()->getUsername(), $data);
+            $bot->sendMessage($message->getChat()->getId(), $res);
+           
+            
+            // $res = get_bond($message->getFrom()->getUsername());
+            // $bot->sendMessage($message->getChat()->getId(), $res); 
+            
+            // $res = get_udata($message->getFrom()->getUsername());
+            // $bot->sendMessage($message->getChat()->getId(), json_encode($data,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE)); 
+
+        }
+        else if(mb_stripos($mtext,"Бонд") !== false){
+            $res = get_bond($message->getFrom()->getUsername());
+            $bot->sendMessage($message->getChat()->getId(), $res);
+            //$bot->sendMessage($message->getChat()->getId(), "Саша Андрюшин, кстати, просил передать, что Бонд - шлюха");
+        }
+        
         }, function($message) use ($name){
         return true; // когда тут true - команда проходит
         });
